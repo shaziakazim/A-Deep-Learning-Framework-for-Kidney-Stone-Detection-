@@ -245,48 +245,69 @@ export default function Detection() {
     setReportLoading(true);
     setError("");
 
-    const generatedDate = new Date().toLocaleString();
+    const now = new Date();
+
+    const generatedDate = now.toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const reportId = `KSD-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
+      now.getDate()
+    )}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 
     const detectionStatus = noStone
       ? "No Stone Detected"
       : "Detection Completed";
 
-    const imageSections = [
+    const statusClass = noStone ? "status-neutral" : "status-positive";
+
+    const fileSizeKB = file ? `${(file.size / 1024).toFixed(0)} KB` : "N/A";
+
+    const fileType = file?.type
+      ? file.type.replace("image/", "").toUpperCase()
+      : "N/A";
+
+    const summaryText = noStone
+      ? "No kidney stone was detected by the YOLOv11 model in the submitted CT image. Segmentation outputs are shown only where the system returned them."
+      : "The submitted CT image was analysed by the YOLOv11 detection model and the detected region(s) were segmented using the Segment Anything Model (SAM). The visual outputs are presented in the Findings section below.";
+
+    const figures = [
       {
         title: "Original CT Scan",
-        description: "Uploaded input image",
+        description: "Input image submitted for analysis",
         image: preview,
+        wide: false,
       },
       ...outputs,
     ];
 
-    const imageHTML = imageSections
+    const figureHTML = figures
       .map(
         (item, index) => `
-          <section class="image-section">
-            <div class="image-heading">
-              <span class="image-number">${String(index + 1).padStart(2, "0")}</span>
-              <div>
-                <h3>${escapeHTML(item.title)}</h3>
-                <p>${escapeHTML(item.description)}</p>
-              </div>
+          <figure class="figure ${item.wide ? "figure-wide" : ""}">
+            <div class="figure-frame">
+              <img src="${escapeHTML(item.image)}" alt="${escapeHTML(item.title)}" />
             </div>
-
-            <div class="image-frame">
-              <img
-                src="${escapeHTML(item.image)}"
-                alt="${escapeHTML(item.title)}"
-              />
-            </div>
-          </section>
+            <figcaption>
+              <strong>Figure ${index + 1}.</strong>
+              ${escapeHTML(item.title)}
+              <span>${escapeHTML(item.description)}</span>
+            </figcaption>
+          </figure>
         `
       )
       .join("");
 
     const messageHTML = result.message
       ? `
-        <div class="message-box">
-          <h3>Backend Message</h3>
+        <div class="note">
+          <div class="note-title">System Message</div>
           <p>${escapeHTML(result.message)}</p>
         </div>
       `
@@ -298,406 +319,439 @@ export default function Detection() {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-        <title>Kidney Stone Detection Report</title>
+        <title>Kidney Stone Detection Report - ${escapeHTML(reportId)}</title>
 
         <style>
-          * {
-            box-sizing: border-box;
+          * { box-sizing: border-box; }
+
+          :root {
+            --navy: #0b2a4a;
+            --blue: #1d4ed8;
+            --blue-soft: #eff6ff;
+            --line: #d7dee8;
+            --text: #1e293b;
+            --muted: #64748b;
           }
 
           body {
             margin: 0;
-            padding: 35px;
-            background: #f1f5f9;
-            color: #0f172a;
-            font-family: Arial, Helvetica, sans-serif;
+            padding: 30px 0;
+            background: #e8edf3;
+            color: var(--text);
+            font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            line-height: 1.55;
           }
 
-          .report {
-            max-width: 850px;
+          .page {
+            position: relative;
+            width: 210mm;
+            min-height: 297mm;
             margin: 0 auto;
-            padding: 42px;
+            padding: 16mm 16mm 22mm;
             background: #ffffff;
-            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 14px rgba(15, 23, 42, 0.12);
           }
 
-          .top-line {
-            height: 7px;
-            margin: -42px -42px 35px;
-            background: #0f172a;
-          }
+          /* ---------- Letterhead ---------- */
 
-          .brand {
+          .letterhead {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
-            padding-bottom: 22px;
-            border-bottom: 1px solid #e2e8f0;
+            gap: 16px;
+            padding-bottom: 14px;
+            border-bottom: 3px solid var(--navy);
           }
 
-          .brand-name {
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-          }
-
-          .report-label {
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-          }
-
-          .heading {
-            padding: 35px 0 25px;
-          }
-
-          .heading .eyebrow {
-            color: #64748b;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-          }
-
-          h1 {
-            margin: 12px 0;
-            font-size: 30px;
-            line-height: 1.2;
-          }
-
-          .subtitle {
-            color: #64748b;
-            font-size: 13px;
-            line-height: 1.7;
-          }
-
-          .status-card {
+          .org {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            margin: 12px 0 30px;
-            padding: 18px 20px;
-            border: 1px solid #cbd5e1;
-            background: #f8fafc;
-          }
-
-          .status-label {
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.3px;
-            text-transform: uppercase;
-          }
-
-          .status-value {
-            margin-top: 6px;
-            font-size: 17px;
-            font-weight: 700;
-          }
-
-          .status-mark {
-            display: flex;
-            width: 38px;
-            height: 38px;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #0f172a;
-            border-radius: 50%;
-            font-size: 19px;
-            font-weight: 700;
-          }
-
-          .section-title {
-            margin: 30px 0 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #0f172a;
-            font-size: 15px;
-            font-weight: 700;
-          }
-
-          .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
             gap: 12px;
           }
 
-          .info-item {
-            padding: 14px;
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-          }
-
-          .info-label {
-            display: block;
-            margin-bottom: 7px;
-            color: #64748b;
-            font-size: 10px;
+          .logo {
+            display: flex;
+            width: 42px;
+            height: 42px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--navy);
+            color: #fff;
+            font-size: 15px;
             font-weight: 700;
             letter-spacing: 1px;
+          }
+
+          .org-name {
+            color: var(--navy);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+          }
+
+          .org-sub {
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
           }
 
-          .info-value {
-            overflow-wrap: anywhere;
-            font-size: 12px;
-            font-weight: 600;
-            line-height: 1.5;
+          .meta {
+            text-align: right;
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.7;
           }
 
-          .message-box {
-            margin-top: 18px;
-            padding: 15px;
-            border-left: 3px solid #0f172a;
-            background: #f8fafc;
+          .meta strong { color: var(--text); }
+
+          /* ---------- Title ---------- */
+
+          .title-block {
+            margin: 22px 0 18px;
+            text-align: center;
           }
 
-          .message-box h3 {
-            margin: 0 0 7px;
-            font-size: 12px;
-          }
-
-          .message-box p {
+          .title-block h1 {
             margin: 0;
-            color: #475569;
-            font-size: 12px;
-            line-height: 1.6;
+            color: var(--navy);
+            font-size: 22px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
           }
 
-          .image-section {
-            margin-top: 25px;
-            page-break-inside: avoid;
+          .title-block p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 11px;
+          }
+
+          /* ---------- Section heading ---------- */
+
+          .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 24px 0 10px;
+            padding: 7px 12px;
+            border-left: 4px solid var(--blue);
+            background: var(--blue-soft);
+            color: var(--navy);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            break-after: avoid;
+          }
+
+          /* ---------- Tables ---------- */
+
+          table.info {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          table.info td {
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            vertical-align: top;
+            word-break: break-word;
+          }
+
+          table.info td.label {
+            width: 22%;
+            background: #f8fafc;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+          }
+
+          table.info td.value {
+            width: 28%;
+            font-weight: 600;
+          }
+
+          /* ---------- Summary ---------- */
+
+          .summary {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+            border: 1px solid var(--line);
             break-inside: avoid;
           }
 
-          .image-heading {
+          .summary-status {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-          }
-
-          .image-number {
-            display: flex;
-            width: 34px;
-            height: 34px;
-            flex-shrink: 0;
-            align-items: center;
+            min-width: 170px;
+            flex-direction: column;
             justify-content: center;
-            background: #0f172a;
-            color: #ffffff;
-            font-size: 11px;
-            font-weight: 700;
+            padding: 14px 16px;
+            color: #fff;
           }
 
-          .image-heading h3 {
-            margin: 0;
-            font-size: 13px;
+          .status-positive { background: #15803d; }
+          .status-neutral  { background: #b45309; }
+
+          .summary-status small {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.85;
           }
 
-          .image-heading p {
-            margin: 5px 0 0;
-            color: #64748b;
-            font-size: 11px;
+          .summary-status strong {
+            margin-top: 4px;
+            font-size: 15px;
+            line-height: 1.3;
           }
 
-          .image-frame {
-            display: flex;
-            min-height: 120px;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-          }
-
-          .image-frame img {
-            display: block;
-            max-width: 100%;
-            max-height: 440px;
-            object-fit: contain;
-          }
-
-          .methodology {
-            margin-top: 30px;
-            padding: 18px;
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-            page-break-inside: avoid;
-          }
-
-          .methodology h3 {
-            margin: 0 0 10px;
-            font-size: 13px;
-          }
-
-          .methodology p {
-            margin: 0;
-            color: #475569;
-            font-size: 11px;
-            line-height: 1.8;
-          }
-
-          .disclaimer {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #cbd5e1;
-            color: #64748b;
-            font-size: 10px;
+          .summary-text {
+            flex: 1;
+            padding: 14px 16px 14px 0;
+            font-size: 12px;
             line-height: 1.7;
           }
 
+          .note {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-left: 3px solid var(--blue);
+            background: #f8fafc;
+            break-inside: avoid;
+          }
+
+          .note-title {
+            margin-bottom: 3px;
+            color: var(--navy);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+          }
+
+          .note p { margin: 0; color: #475569; }
+
+          /* ---------- Figures ---------- */
+
+          .figures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+          }
+
+          .figure {
+            margin: 0;
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .figure-wide { grid-column: 1 / -1; }
+
+          .figure-frame {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border: 1px solid var(--line);
+            background: #0b0f14;
+          }
+
+          .figure-frame img {
+            display: block;
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+          }
+
+          .figure-wide .figure-frame img { max-height: 330px; }
+
+          figcaption {
+            margin-top: 6px;
+            font-size: 10.5px;
+            color: var(--text);
+          }
+
+          figcaption strong { color: var(--navy); }
+
+          figcaption span {
+            display: block;
+            margin-top: 1px;
+            color: var(--muted);
+            font-size: 10px;
+          }
+
+          /* ---------- Methodology ---------- */
+
+          .method-text {
+            margin: 0;
+            color: #475569;
+            text-align: justify;
+          }
+
+          /* ---------- Sign-off ---------- */
+
+          .signoff {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 34px;
+            break-inside: avoid;
+          }
+
+          .sign-line {
+            padding-top: 6px;
+            border-top: 1px solid var(--text);
+            color: var(--muted);
+            font-size: 10px;
+          }
+
+          .disclaimer {
+            margin-top: 24px;
+            padding: 12px 14px;
+            border: 1px solid #fcd9a8;
+            background: #fffbf3;
+            color: #7c4a03;
+            font-size: 10px;
+            line-height: 1.7;
+            break-inside: avoid;
+          }
+
+          /* ---------- Footer ---------- */
+
           .footer {
+            position: absolute;
+            right: 16mm;
+            bottom: 9mm;
+            left: 16mm;
             display: flex;
             justify-content: space-between;
-            gap: 15px;
-            margin-top: 22px;
-            padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
-            color: #64748b;
+            padding-top: 7px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
             font-size: 9px;
           }
 
-          @page {
-            size: A4;
-            margin: 14mm;
-          }
+          @page { size: A4; margin: 0; }
 
           @media print {
             body {
               padding: 0;
-              background: #ffffff;
+              background: #fff;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
 
-            .report {
-              max-width: none;
-              padding: 15px;
-              border: none;
-            }
-
-            .top-line {
-              margin: -15px -15px 25px;
-            }
-
-            .image-section {
-              page-break-inside: avoid;
-              break-inside: avoid;
-            }
-
-            .image-frame img {
-              max-height: 390px;
+            .page {
+              width: auto;
+              margin: 0;
+              box-shadow: none;
             }
           }
         </style>
       </head>
 
       <body>
-        <main class="report">
+        <main class="page">
 
-          <div class="top-line"></div>
-
-          <header class="brand">
-            <div class="brand-name">
-              Kidney Stone Detection System
-            </div>
-
-            <div class="report-label">
-              ANALYSIS REPORT
-            </div>
-          </header>
-
-          <section class="heading">
-            <div class="eyebrow">Medical Imaging Research Project</div>
-
-            <h1>Kidney Stone Detection Report</h1>
-
-            <p class="subtitle">
-              CT scan analysis using YOLOv11 detection and
-              Segment Anything Model (SAM) segmentation.
-            </p>
-          </section>
-
-          <section class="status-card">
-            <div>
-              <div class="status-label">Analysis Status</div>
-              <div class="status-value">
-                ${escapeHTML(detectionStatus)}
+          <header class="letterhead">
+            <div class="org">
+              <div class="logo">KSD</div>
+              <div>
+                <div class="org-name">Kidney Stone Detection System</div>
+                <div class="org-sub">AI-Assisted CT Image Analysis</div>
               </div>
             </div>
 
-            <div class="status-mark">
-              ${noStone ? "!" : "✓"}
+            <div class="meta">
+              <div><strong>Report ID:</strong> ${escapeHTML(reportId)}</div>
+              <div><strong>Date:</strong> ${escapeHTML(generatedDate)}</div>
             </div>
+          </header>
+
+          <section class="title-block">
+            <h1>CT Analysis Report</h1>
+            <p>Kidney stone detection and segmentation</p>
           </section>
 
-          <h2 class="section-title">01 — Scan Information</h2>
+          <div class="section-title">1. Summary of Analysis</div>
 
-          <div class="info-grid">
-
-            <div class="info-item">
-              <span class="info-label">Uploaded File</span>
-              <span class="info-value">
-                ${escapeHTML(file?.name || "Not available")}
-              </span>
+          <div class="summary">
+            <div class="summary-status ${statusClass}">
+              <small>Analysis Status</small>
+              <strong>${escapeHTML(detectionStatus)}</strong>
             </div>
-
-            <div class="info-item">
-              <span class="info-label">Report Generated</span>
-              <span class="info-value">
-                ${escapeHTML(generatedDate)}
-              </span>
-            </div>
-
-            <div class="info-item">
-              <span class="info-label">Detection Model</span>
-              <span class="info-value">YOLOv11</span>
-            </div>
-
-            <div class="info-item">
-              <span class="info-label">Segmentation Model</span>
-              <span class="info-value">Original SAM</span>
-            </div>
-
+            <div class="summary-text">${escapeHTML(summaryText)}</div>
           </div>
 
           ${messageHTML}
 
-          <h2 class="section-title">02 — Visual Analysis Results</h2>
+          <div class="section-title">2. Scan Information</div>
 
-          ${imageHTML}
+          <table class="info">
+            <tr>
+              <td class="label">File Name</td>
+              <td class="value">${escapeHTML(file?.name || "N/A")}</td>
+              <td class="label">Report ID</td>
+              <td class="value">${escapeHTML(reportId)}</td>
+            </tr>
+            <tr>
+              <td class="label">Image Format</td>
+              <td class="value">${escapeHTML(fileType)}</td>
+              <td class="label">File Size</td>
+              <td class="value">${escapeHTML(fileSizeKB)}</td>
+            </tr>
+            <tr>
+              <td class="label">Detection Model</td>
+              <td class="value">YOLOv11</td>
+              <td class="label">Segmentation Model</td>
+              <td class="value">Segment Anything (SAM)</td>
+            </tr>
+            <tr>
+              <td class="label">Generated On</td>
+              <td class="value" colspan="3">${escapeHTML(generatedDate)}</td>
+            </tr>
+          </table>
 
-          <section class="methodology">
-            <h3>Analysis Pipeline</h3>
-            <p>
-              The uploaded CT scan is processed by the YOLOv11
-              detection model to identify candidate regions.
-              The Original Segment Anything Model (SAM) is then
-              used for segmentation of the detected regions.
-              The system also provides the size-estimation output
-              when it is returned by the backend.
-            </p>
-          </section>
+          <div class="section-title">3. Findings: Visual Results</div>
 
-          <section class="disclaimer">
-            <strong>Important Notice:</strong>
-            This report is generated by an academic research
-            prototype. Its outputs are intended for research
-            and educational purposes only. They do not constitute
-            a medical diagnosis or treatment recommendation.
-            All findings must be reviewed by a qualified healthcare
-            professional.
-          </section>
+          <div class="figures">
+            ${figureHTML}
+          </div>
+
+          <div class="section-title">4. Methodology</div>
+
+          <p class="method-text">
+            The uploaded CT image is first passed to a YOLOv11 object
+            detection model, which localises candidate kidney stone regions.
+            The detected regions are then segmented using the Segment
+            Anything Model (SAM) to outline stone boundaries. Where the
+            system returns it, an additional output with the estimated
+            stone size is included. All results are produced automatically
+            and have not been manually verified.
+          </p>
+
+          <div class="signoff">
+            <div class="sign-line">Reviewed by (Name &amp; Signature)</div>
+            <div class="sign-line">Date</div>
+          </div>
+
+          <div class="disclaimer">
+            <strong>Important Notice:</strong> This report is generated by an
+            academic research prototype and is intended for research and
+            educational purposes only. It is not a medical diagnosis or a
+            treatment recommendation. All findings must be reviewed and
+            confirmed by a qualified healthcare professional.
+          </div>
 
           <footer class="footer">
-            <span>Kidney Stone Detection System</span>
-            <span>Generated: ${escapeHTML(generatedDate)}</span>
+            <span>Kidney Stone Detection System | ${escapeHTML(reportId)}</span>
+            <span>Confidential: Research Use Only</span>
           </footer>
 
         </main>
@@ -720,9 +774,7 @@ export default function Detection() {
     };
 
     reportWindow.onload = async () => {
-      const images = Array.from(
-        reportWindow.document.images
-      );
+      const images = Array.from(reportWindow.document.images);
 
       await Promise.all(
         images.map((image) => {
