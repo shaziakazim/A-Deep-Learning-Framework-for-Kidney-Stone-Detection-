@@ -1,12 +1,11 @@
 
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 
 import { FiActivity, FiArrowRight } from "react-icons/fi";
 
 import "swiper/css";
-import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 const slides = [
@@ -21,7 +20,7 @@ const slides = [
     title: "Intelligent",
     p1: "Stone Segmentation",
     description:
-      "Advanced AI-based segmentation to identify kidney stone boundaries and generate detailed segmentation masks from CT scan images.",
+      "Advanced AI-based segmentation using MedSAM to identify kidney stone boundaries and generate detailed segmentation masks from CT scan images.",
     badge: "Advanced Image Segmentation",
   },
   {
@@ -34,8 +33,8 @@ const slides = [
 ];
 
 const STONE = {
-  left: 62,
-  top: 30.9,
+  left: 60,
+  top: 35,
   width: 5.4,
   height: 7.2,
 };
@@ -50,7 +49,6 @@ const ScanViewer = () => (
 
       {/* TOP BAR */}
       <div className="flex items-center justify-between border-b border-white/10 bg-slate-900 px-4 py-3">
-
         <span className="text-xs font-semibold text-slate-200 sm:text-sm">
           CT Scan · Coronal View
         </span>
@@ -59,14 +57,13 @@ const ScanViewer = () => (
           <span className="h-2 w-2 rounded-full bg-cyan-400" />
           <span className="text-cyan-300">Analysis Ready</span>
         </span>
-
       </div>
 
-      {/* CT IMAGE */}
-      <div className="relative h-[170px] w-full bg-black sm:h-[260px] lg:h-[350px]">
+      {/* CT IMAGE - SAME HEIGHT AS ABOUT IMAGE */}
+      <div className="relative h-64 w-full bg-black sm:h-80 lg:h-[350px]">
 
         <img
-          src="images/a_high_resolution_medically_styled_ct_scan_image.png"
+          src="/images/a_high_resolution_medically_styled_ct_scan_image.png"
           alt="CT scan showing kidney stone"
           className="absolute inset-0 h-full w-full object-contain"
           loading="eager"
@@ -96,12 +93,10 @@ const ScanViewer = () => (
         <div className="absolute bottom-3 left-3 rounded-md border border-cyan-300/30 bg-slate-950/90 px-3 py-1.5 text-xs font-medium text-cyan-300">
           Kidney Stone Detected
         </div>
-
       </div>
 
       {/* BOTTOM BAR */}
       <div className="flex items-center justify-between border-t border-white/10 bg-slate-900 px-4 py-3">
-
         <span className="text-xs text-slate-400">
           1 Stone Detected
         </span>
@@ -109,7 +104,6 @@ const ScanViewer = () => (
         <span className="text-xs font-medium text-cyan-300">
           Left Kidney
         </span>
-
       </div>
 
     </div>
@@ -123,19 +117,17 @@ const Hero = () => {
     <section className="relative w-full overflow-hidden bg-slate-950">
 
       <Swiper
-        modules={[Navigation, Pagination, Autoplay]}
-        navigation
+        modules={[Pagination, Autoplay]}
         pagination={{ clickable: true }}
         autoplay={{
           delay: 5000,
           disableOnInteraction: false,
         }}
         loop
-        className="hero-swiper h-[calc(100svh-80px)] min-h-[520px] max-h-[850px] [--swiper-theme-color:#60a5fa] [--swiper-navigation-size:20px] [--swiper-pagination-bullet-inactive-color:#94a3b8] [--swiper-pagination-bullet-inactive-opacity:0.6]"
+        className="hero-swiper h-[calc(100svh-80px)] min-h-[520px] max-h-[850px] [--swiper-pagination-bullet-inactive-color:#94a3b8] [--swiper-pagination-bullet-inactive-opacity:0.6]"
       >
 
         {slides.map((slide, index) => (
-
           <SwiperSlide key={index}>
 
             <div className="relative flex h-full w-full items-center overflow-hidden bg-slate-950">
@@ -167,22 +159,17 @@ const Hero = () => {
 
                   {/* BADGE */}
                   <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-400/10 px-3 py-2 text-[11px] font-semibold text-blue-300 sm:mb-5 sm:px-4 sm:text-xs">
-
                     <FiActivity className="text-sm" />
-
                     {slide.badge}
-
                   </div>
 
                   {/* HEADING */}
                   <h1 className="max-w-2xl text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-5xl xl:text-[54px]">
-
                     {slide.title}
 
                     <span className="mt-1 block bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                       {slide.p1}
                     </span>
-
                   </h1>
 
                   {/* DESCRIPTION */}
@@ -224,7 +211,7 @@ const Hero = () => {
 
                     <div>
                       <p className="text-base font-bold text-cyan-400 sm:text-lg">
-                        SAM
+                        MedSAM
                       </p>
                       <p className="mt-1 text-[11px] text-slate-400 sm:text-xs">
                         Segmentation
@@ -241,22 +228,16 @@ const Hero = () => {
                     </div>
 
                   </div>
-
                 </div>
 
                 {/* RIGHT CONTENT */}
                 <div className="relative flex w-full items-center justify-center md:pl-3 lg:pl-6">
-
                   <ScanViewer />
-
                 </div>
 
               </div>
-
             </div>
-
           </SwiperSlide>
-
         ))}
 
       </Swiper>
@@ -272,21 +253,7 @@ const Hero = () => {
 
           .hero-swiper .swiper-button-next,
           .hero-swiper .swiper-button-prev {
-            color: #60a5fa;
-            transition: color 0.3s ease;
-          }
-
-          .hero-swiper .swiper-button-next:hover,
-          .hero-swiper .swiper-button-prev:hover {
-            color: #22d3ee;
-          }
-
-          .hero-swiper .swiper-button-prev {
-            left: 12px;
-          }
-
-          .hero-swiper .swiper-button-next {
-            right: 12px;
+            display: none !important;
           }
 
           .hero-swiper .swiper-pagination {
@@ -304,11 +271,6 @@ const Hero = () => {
           }
 
           @media (max-width: 767px) {
-            .hero-swiper .swiper-button-next,
-            .hero-swiper .swiper-button-prev {
-              display: none;
-            }
-
             .hero-swiper .swiper-pagination {
               bottom: 5px !important;
             }
