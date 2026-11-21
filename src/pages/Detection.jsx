@@ -64,39 +64,30 @@ const ResultImage = ({ title, image, description }) => {
   if (!image) return null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-blue-200 hover:shadow-lg">
-
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-400 hover:shadow-md">
       <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-white">
             <FiImage size={18} />
           </div>
 
           <div>
             <h3 className="font-bold text-slate-900">{title}</h3>
             {description && (
-              <p className="mt-1 text-xs text-slate-500">
-                {description}
-              </p>
+              <p className="mt-1 text-xs text-slate-500">{description}</p>
             )}
           </div>
         </div>
       </div>
 
       <div className="flex min-h-[220px] items-center justify-center bg-slate-50 p-4">
-
         {imageError ? (
           <div className="py-10 text-center text-sm text-slate-500">
             <FiImage className="mx-auto mb-2 text-2xl" />
             Unable to load this image.
           </div>
         ) : (
-          <a
-            href={image}
-            target="_blank"
-            rel="noreferrer"
-            className="block w-full"
-          >
+          <a href={image} target="_blank" rel="noreferrer" className="block w-full">
             <img
               src={image}
               alt={title}
@@ -105,7 +96,6 @@ const ResultImage = ({ title, image, description }) => {
             />
           </a>
         )}
-
       </div>
     </div>
   );
@@ -329,7 +319,6 @@ export default function Detection() {
         <head>
           <meta charset="UTF-8" />
           <title>Kidney Stone Detection Report</title>
-
           <style>
             * { box-sizing: border-box; }
 
@@ -351,12 +340,12 @@ export default function Detection() {
 
             .header {
               padding-bottom: 24px;
-              border-bottom: 3px solid #12345a;
+              border-bottom: 3px solid #0f172a;
             }
 
             .header h1 {
               margin: 0;
-              color: #12345a;
+              color: #0f172a;
               font-size: 27px;
             }
 
@@ -372,7 +361,7 @@ export default function Detection() {
               margin: 0 0 14px;
               padding-bottom: 9px;
               border-bottom: 1px solid #e2e8f0;
-              color: #12345a;
+              color: #0f172a;
               font-size: 17px;
             }
 
@@ -439,7 +428,7 @@ export default function Detection() {
 
             .note {
               padding: 14px;
-              border-left: 4px solid #12345a;
+              border-left: 4px solid #0f172a;
               background: #f8fafc;
               color: #475569;
               font-size: 12px;
@@ -499,17 +488,14 @@ export default function Detection() {
                   <span>Report Date</span>
                   <strong>${escapeHTML(date)}</strong>
                 </div>
-
                 <div class="detail">
                   <span>Report Time</span>
                   <strong>${escapeHTML(time)}</strong>
                 </div>
-
                 <div class="detail">
                   <span>Uploaded File</span>
                   <strong>${escapeHTML(file?.name || "CT Scan Image")}</strong>
                 </div>
-
                 <div class="detail">
                   <span>Estimated Stone Size</span>
                   <strong>${sizeEstimate}</strong>
@@ -588,9 +574,7 @@ export default function Detection() {
       reportWindow.document.write(html);
       reportWindow.document.close();
     } catch (err) {
-      setReportError(
-        err.message || "Unable to generate the PDF report."
-      );
+      setReportError(err.message || "Unable to generate the PDF report.");
     } finally {
       setReportLoading(false);
     }
@@ -598,17 +582,10 @@ export default function Detection() {
 
   return (
     <section className="relative overflow-hidden bg-white px-4 py-16 text-slate-900 sm:px-6 lg:px-8 lg:py-20">
-
-      {/* SUBTLE BACKGROUND DECORATION */}
-      <div className="pointer-events-none absolute -right-40 top-0 h-96 w-96 rounded-full bg-blue-100/50 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-50 blur-3xl" />
-
-      <div className="relative z-10 mx-auto max-w-7xl">
-
+      <div className="mx-auto max-w-7xl">
         {/* SECTION HEADER */}
         <div className="mx-auto mb-12 max-w-3xl text-center">
-
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700">
             <FiActivity />
             AI-Powered Analysis
           </div>
@@ -632,27 +609,20 @@ export default function Detection() {
               </span>
             ))}
           </div>
-
         </div>
 
         <div className="grid grid-cols-1 items-start gap-7 lg:grid-cols-12">
-
           {/* UPLOAD SECTION */}
           <div className="lg:sticky lg:top-24 lg:col-span-5">
-
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-900/5">
-
               <div className="border-b border-slate-200 bg-slate-50 px-5 py-5">
-
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
                     <FiUploadCloud size={21} />
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-slate-900">
-                      Upload CT Scan
-                    </h3>
+                    <h3 className="font-bold text-slate-900">Upload CT Scan</h3>
                     <p className="mt-1 text-xs text-slate-500">
                       Select an image for analysis
                     </p>
@@ -662,13 +632,10 @@ export default function Detection() {
                 <p className="mt-4 text-xs leading-5 text-slate-500">
                   Supported formats: JPG, JPEG and PNG. Maximum size: 10 MB.
                 </p>
-
               </div>
 
               <div className="p-5">
-
                 {!preview ? (
-
                   <label
                     onDragOver={(event) => {
                       event.preventDefault();
@@ -678,12 +645,11 @@ export default function Detection() {
                     onDrop={handleDrop}
                     className={`flex min-h-[280px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-8 text-center transition duration-300 ${
                       dragging
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/50"
+                        ? "border-slate-900 bg-slate-100"
+                        : "border-slate-300 bg-slate-50 hover:border-slate-500 hover:bg-slate-100"
                     }`}
                   >
-
-                    <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                    <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-white">
                       <FiUploadCloud size={30} />
                     </div>
 
@@ -695,7 +661,7 @@ export default function Detection() {
                       or click below to browse files
                     </p>
 
-                    <span className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700">
+                    <span className="mt-5 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-slate-800">
                       <FiImage size={17} />
                       Browse Image
                     </span>
@@ -706,23 +672,19 @@ export default function Detection() {
                       onChange={handleFileChange}
                       className="hidden"
                     />
-
                   </label>
-
                 ) : (
-
                   <div>
-
                     <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                        <FiImage className="text-blue-600" />
+                        <FiImage className="text-slate-700" />
                         Uploaded Image
                       </div>
 
                       <button
                         onClick={clearImage}
                         type="button"
-                        className="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                        className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-red-600"
                         title="Remove image"
                       >
                         <FiX size={18} />
@@ -748,11 +710,9 @@ export default function Detection() {
                           : ""}
                       </p>
                     </div>
-
                   </div>
                 )}
 
-                {/* ERROR MESSAGE */}
                 {error && (
                   <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                     <FiAlertCircle className="mt-0.5 shrink-0" />
@@ -760,12 +720,11 @@ export default function Detection() {
                   </div>
                 )}
 
-                {/* DETECTION BUTTON */}
                 <button
                   type="button"
                   onClick={handleDetection}
                   disabled={!file || loading}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 font-semibold text-white shadow-md shadow-blue-600/20 transition duration-300 hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3.5 font-semibold text-white shadow-md transition duration-300 hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
                 >
                   {loading ? (
                     <>
@@ -784,7 +743,7 @@ export default function Detection() {
                   <button
                     type="button"
                     onClick={clearImage}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
                   >
                     <FiRefreshCw size={16} />
                     Reset Image
@@ -792,11 +751,9 @@ export default function Detection() {
                 )}
 
                 {/* IMAGE FILTERING INFO */}
-                <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/70 p-4">
-
+                <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start gap-3">
-
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white">
                       <FiShield size={19} />
                     </div>
 
@@ -804,48 +761,35 @@ export default function Detection() {
                       <h4 className="text-sm font-semibold text-slate-900">
                         Image Filtering
                       </h4>
-
                       <p className="mt-1 text-xs leading-5 text-slate-600">
                         The uploaded image is checked before the detection
                         and segmentation stages are performed.
                       </p>
                     </div>
-
                   </div>
-
                 </div>
-
               </div>
             </div>
           </div>
 
           {/* RESULTS SECTION */}
           <div className="lg:col-span-7">
-
             <div className="min-h-[420px] rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-900/5 sm:p-6">
-
               <div className="mb-5 flex items-center gap-3 border-b border-slate-200 pb-4">
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
                   <FiActivity size={20} />
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-slate-900">
-                    Detection Results
-                  </h3>
+                  <h3 className="font-bold text-slate-900">Detection Results</h3>
                   <p className="mt-1 text-xs text-slate-500">
                     AI image processing and analysis output
                   </p>
                 </div>
-
               </div>
 
-              {/* EMPTY STATE */}
               {!result && !loading && (
-
                 <div className="flex min-h-[330px] flex-col items-center justify-center text-center">
-
                   <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">
                     <FiImage size={34} />
                   </div>
@@ -858,16 +802,12 @@ export default function Detection() {
                     Upload a kidney CT image and click Start Detection to
                     view the processing results here.
                   </p>
-
                 </div>
               )}
 
-              {/* LOADING STATE */}
               {loading && (
-
                 <div className="flex min-h-[330px] flex-col items-center justify-center text-center">
-
-                  <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-600">
+                  <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-800">
                     <FiLoader className="animate-spin" size={30} />
                   </div>
 
@@ -879,16 +819,11 @@ export default function Detection() {
                     Please wait while the image filtering, detection and
                     segmentation pipeline processes your image.
                   </p>
-
                 </div>
               )}
 
-              {/* RESULTS */}
               {result && !loading && (
-
                 <div className="space-y-6">
-
-                  {/* FILTER STATUS */}
                   <div
                     className={`flex items-center gap-3 rounded-xl border p-4 text-sm font-semibold ${
                       rejected
@@ -896,7 +831,6 @@ export default function Detection() {
                         : "border-emerald-200 bg-emerald-50 text-emerald-700"
                     }`}
                   >
-
                     {rejected ? (
                       <FiAlertCircle size={21} className="shrink-0" />
                     ) : (
@@ -908,14 +842,10 @@ export default function Detection() {
                         ? "Image did not pass Kidney CT Filtering"
                         : "Kidney CT image detected."}
                     </span>
-
                   </div>
 
-                  {/* REJECTED IMAGE */}
                   {rejected && (
-
                     <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-
                       <h3 className="font-semibold text-red-700">
                         Image Not Accepted
                       </h3>
@@ -924,22 +854,14 @@ export default function Detection() {
                         Please upload a supported kidney CT scan image to
                         continue the analysis.
                       </p>
-
                     </div>
                   )}
 
-                  {/* ACCEPTED IMAGE */}
                   {!rejected && (
-
                     <>
-
-                      {/* NO STONE */}
                       {noStone && (
-
                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-
                           <div className="flex items-start gap-3">
-
                             <FiAlertCircle className="mt-0.5 shrink-0 text-amber-600" />
 
                             <div>
@@ -953,17 +875,12 @@ export default function Detection() {
                                 detection for this image.
                               </p>
                             </div>
-
                           </div>
-
                         </div>
                       )}
 
-                      {/* OUTPUT IMAGES */}
                       {outputs.length > 0 && (
-
                         <div>
-
                           <div className="mb-4">
                             <h3 className="font-bold text-slate-900">
                               Processing Output
@@ -975,7 +892,6 @@ export default function Detection() {
                           </div>
 
                           <div className="grid grid-cols-1 gap-5">
-
                             {outputs.map((item) => (
                               <ResultImage
                                 key={item.title}
@@ -984,30 +900,22 @@ export default function Detection() {
                                 description={item.description}
                               />
                             ))}
-
                           </div>
-
                         </div>
                       )}
 
                       {outputs.length === 0 && (
-
                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
                           The image passed the kidney CT filter, but no
                           output images were returned by the backend.
                           Please check the backend response.
                         </div>
-
                       )}
 
-                      {/* PDF REPORT */}
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
                           <div className="flex items-start gap-3">
-
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-700">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-900">
                               <FiFileText size={21} />
                             </div>
 
@@ -1021,26 +929,21 @@ export default function Detection() {
                                 image and available processing results.
                               </p>
                             </div>
-
                           </div>
 
                           <button
                             type="button"
                             onClick={generatePDFReport}
                             disabled={reportLoading}
-                            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-
                             {reportLoading ? (
                               <FiLoader className="animate-spin" size={17} />
                             ) : (
                               <FiDownload size={17} />
                             )}
-
                             Generate PDF
-
                           </button>
-
                         </div>
 
                         {reportError && (
@@ -1048,23 +951,17 @@ export default function Detection() {
                             {reportError}
                           </div>
                         )}
-
                       </div>
-
                     </>
                   )}
-
                 </div>
               )}
-
             </div>
           </div>
-
         </div>
 
         {/* DISCLAIMER */}
         <div className="mt-7 rounded-xl border border-slate-200 bg-slate-50 p-4">
-
           <p className="text-xs leading-6 text-slate-600">
             <strong className="text-slate-800">Disclaimer:</strong>{" "}
             This system is an academic research prototype for medical image
@@ -1072,9 +969,7 @@ export default function Detection() {
             only and should not be treated as a clinical diagnosis or
             treatment recommendation.
           </p>
-
         </div>
-
       </div>
     </section>
   );
