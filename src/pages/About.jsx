@@ -18,8 +18,6 @@ import {
 } from "react-icons/fi";
 
 const images = {
-  ctScan:
-    "https://bookmerilab.com/blog/wp-content/uploads/2018/02/CT-KUB-Kidney-Stone-Image-min-1024x533.jpg",
   kidney:
     "https://www.hakkiperk.com/view/uploads/icerik/67e70a6b7a6a6174319473189.jpg",
 };
@@ -161,8 +159,8 @@ const About = () => {
       {/* HERO SECTION */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0">
-          <div className="absolute -left-32 -top-32 h-72 w-72 rounded-full bg-blue-600/20 blur-3xl" />
-          <div className="absolute -bottom-32 -right-20 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="absolute -left-32 -top-32 h-72 w-72 rounded-full bg-blue-600/10 blur-3xl" />
+          <div className="absolute -bottom-32 -right-20 h-72 w-72 rounded-full bg-cyan-500/5 blur-3xl" />
           <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(255,255,255,0.4)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.4)_1px,transparent_1px)] [background-size:40px_40px]" />
         </div>
 
@@ -170,7 +168,7 @@ const About = () => {
 
           {/* HERO CONTENT */}
           <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-400/10 px-4 py-2 text-xs font-semibold text-blue-300">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-white/5 px-4 py-2 text-xs font-semibold text-blue-300">
               <FiActivity />
               About Our Project
             </div>
@@ -191,7 +189,7 @@ const About = () => {
             <div className="mt-7 flex flex-wrap gap-3">
               <a
                 href="#overview"
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-500"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
               >
                 Explore Project
                 <FiArrowUpRight />
@@ -199,7 +197,7 @@ const About = () => {
 
               <a
                 href="#future-work"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-600 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300"
               >
                 Future Work
                 <FiTrendingUp />
@@ -223,25 +221,27 @@ const About = () => {
 
           {/* HERO IMAGE */}
           <div className="relative">
-            <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-blue-500/20 to-cyan-400/20 blur-2xl" />
+            <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-blue-600/15 to-cyan-500/5 blur-2xl" />
 
             <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-slate-900 shadow-2xl">
               <img
-                src="images\Stone_frame_0040.png"
+                src="images/Stone_frame_0040.png"
                 alt="Illustrative kidney CT scan showing kidney stones"
                 className="h-64 w-full object-cover sm:h-80 lg:h-[350px]"
                 loading="eager"
               />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent" />
 
               <div className="absolute bottom-0 left-0 right-0 p-5">
-                <span className="rounded-full border border-cyan-300/30 bg-cyan-400/15 px-3 py-1.5 text-xs font-semibold text-cyan-200">
+                <span className="rounded-full border border-cyan-300/20 bg-slate-950/70 px-3 py-1.5 text-xs font-semibold text-cyan-200">
                   CT Image Analysis
                 </span>
+
                 <h3 className="mt-3 text-xl font-bold text-white">
                   Intelligent Kidney Stone Detection
                 </h3>
+
                 <p className="mt-1 text-sm text-slate-300">
                   Deep learning-based image analysis
                 </p>
@@ -257,9 +257,7 @@ const About = () => {
 
           {/* OVERVIEW IMAGE */}
           <div className="relative">
-            <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-blue-100 to-cyan-50 blur-xl" />
-
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-xl">
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 p-3 shadow-xl">
               <img
                 src={images.kidney}
                 alt="Illustration of kidney anatomy and kidney stones"
@@ -280,7 +278,7 @@ const About = () => {
 
           {/* OVERVIEW TEXT */}
           <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700">
               <FiActivity />
               Project Overview
             </div>
@@ -318,7 +316,7 @@ const About = () => {
                     key={item.title}
                     className="rounded-xl border border-slate-200 bg-slate-50 p-4"
                   >
-                    <Icon className="text-xl text-blue-600" />
+                    <Icon className="text-xl text-slate-700" />
                     <h4 className="mt-3 text-sm font-bold text-slate-900">
                       {item.title}
                     </h4>
@@ -337,7 +335,7 @@ const About = () => {
       <section className="bg-slate-50 py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-xs font-semibold text-blue-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700">
               <FiLayers />
               Core Capabilities
             </div>
@@ -359,9 +357,9 @@ const About = () => {
               return (
                 <div
                   key={item.title}
-                  className="group rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-900/5"
+                  className="group rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-slate-400 hover:shadow-xl hover:shadow-slate-900/5"
                 >
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-xl text-blue-700 transition group-hover:bg-blue-600 group-hover:text-white">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-xl text-slate-800 transition group-hover:bg-slate-900 group-hover:text-white">
                     <Icon />
                   </div>
 
@@ -383,7 +381,7 @@ const About = () => {
       <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700">
               <FiCpu />
               Technologies
             </div>
@@ -402,14 +400,14 @@ const About = () => {
             {technologies.map((tech) => (
               <div
                 key={tech.name}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition hover:border-blue-200 hover:bg-white hover:shadow-lg"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition hover:border-slate-400 hover:bg-white hover:shadow-lg"
               >
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
                     {tech.category}
                   </span>
 
-                  <FiCheckCircle className="text-lg text-blue-600" />
+                  <FiCheckCircle className="text-lg text-slate-700" />
                 </div>
 
                 <h3 className="text-lg font-bold text-slate-950">
@@ -430,12 +428,12 @@ const About = () => {
         id="future-work"
         className="relative overflow-hidden bg-slate-950 py-16 text-white lg:py-20"
       >
-        <div className="absolute -right-40 top-0 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute -right-40 top-0 h-96 w-96 rounded-full bg-blue-600/5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-cyan-500/5 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-400/10 px-4 py-2 text-xs font-semibold text-blue-300">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-700 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-300">
               <FiTrendingUp />
               Research Directions
             </div>
@@ -463,7 +461,7 @@ const About = () => {
                   key={item.label}
                   className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 text-center"
                 >
-                  <p className="text-3xl font-bold text-blue-300 sm:text-4xl">
+                  <p className="text-3xl font-bold text-slate-200 sm:text-4xl">
                     {item.value}
                   </p>
 
@@ -477,8 +475,8 @@ const About = () => {
             <p className="mt-5 text-sm leading-7 text-slate-400">
               The local dataset was collected from a single hospital and
               contains a limited number of original patient images. Data
-              augmentation increases the number of training samples but does
-              not introduce new patient information.
+              augmentation increases the number of training samples but
+              does not introduce new patient information.
             </p>
           </div>
 
@@ -495,14 +493,14 @@ const About = () => {
                 return (
                   <div
                     key={item.number}
-                    className="group rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:border-blue-400/40 hover:bg-white/[0.07]"
+                    className="group rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:border-slate-500 hover:bg-white/[0.07]"
                   >
                     <div className="mb-5 flex items-center justify-between">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/15 text-xl text-blue-300 transition group-hover:bg-blue-500 group-hover:text-white">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-xl text-slate-200 transition group-hover:bg-white group-hover:text-slate-950">
                         <Icon />
                       </div>
 
-                      <span className="text-sm font-bold tracking-widest text-blue-400">
+                      <span className="text-sm font-bold tracking-widest text-slate-400">
                         {item.number}
                       </span>
                     </div>
@@ -521,9 +519,9 @@ const About = () => {
           </div>
 
           {/* LONG-TERM VISION */}
-          <div className="rounded-3xl border border-blue-400/20 bg-gradient-to-r from-blue-600/15 to-cyan-500/10 p-7 sm:p-9">
+          <div className="rounded-3xl border border-slate-700 bg-white/[0.04] p-7 sm:p-9">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-500/20 text-2xl text-blue-300">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-2xl text-slate-200">
                 <FiHeart />
               </div>
 
