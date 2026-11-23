@@ -29,7 +29,7 @@ function Footer() {
 
             <p className="max-w-sm text-sm leading-7 text-slate-300">
               An AI-based kidney stone analysis system that uses
-              YOLOv11 and MedSAM to detect, localize, segment, and
+              YOLOv11 and SAM to detect, localize, segment, and
               visualize kidney stones in CT scan images.
             </p>
           </div>
@@ -85,7 +85,7 @@ function Footer() {
               </li>
 
               <li className="transition hover:text-cyan-400">
-                MedSAM Segmentation
+                SAM Segmentation
               </li>
 
               <li className="transition hover:text-cyan-400">

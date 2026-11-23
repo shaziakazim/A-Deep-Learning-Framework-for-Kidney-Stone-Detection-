@@ -225,7 +225,7 @@ const About = () => {
 
             <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-slate-900 shadow-2xl">
               <img
-                src="images/Stone_frame_0040.png"
+                src="\images\Screenshot 2026-11-22 194239.png"
                 alt="Illustrative kidney CT scan showing kidney stones"
                 className="h-64 w-full object-cover sm:h-80 lg:h-[350px]"
                 loading="eager"
@@ -259,7 +259,7 @@ const About = () => {
           <div className="relative">
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 p-3 shadow-xl">
               <img
-                src={images.kidney}
+                src='\images\Screenshot 2026-11-22 194239.png'
                 alt="Illustration of kidney anatomy and kidney stones"
                 className="h-72 w-full rounded-2xl object-cover sm:h-96"
                 loading="lazy"
