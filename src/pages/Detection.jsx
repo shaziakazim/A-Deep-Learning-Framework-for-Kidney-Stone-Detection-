@@ -18,6 +18,7 @@ import {
 const API_URL = "http://127.0.0.1:5000/api/predict";
 const BACKEND_URL = "http://127.0.0.1:5000";
 
+/* IMAGE URL */
 const getImageUrl = (image) => {
   if (!image || typeof image !== "string") return "";
 
@@ -33,6 +34,7 @@ const getImageUrl = (image) => {
   return `${BACKEND_URL}/${image.replace(/^\/+/, "")}`;
 };
 
+/* FIND OUTPUT IMAGE */
 const findImage = (data, keys) => {
   if (!data) return "";
 
@@ -45,17 +47,158 @@ const findImage = (data, keys) => {
   return "";
 };
 
-const escapeHTML = (value) => {
-  return String(value ?? "")
+/* ESCAPE HTML FOR PDF */
+const escapeHTML = (value) =>
+  String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+
+/* FORMAT SIZE */
+const formatSize = (value, unit = "mm") => {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    const match = value.match(/(\d+(?:\.\d+)?)\s*(mm)?/i);
+
+    if (!match) return null;
+
+    const number = Number(match[1]);
+    const formatted = Number(number.toFixed(2));
+
+    return `${formatted} ${match[2] || unit}`;
+  }
+
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) return null;
+
+  return `${Number(number.toFixed(2))} ${unit}`;
+};
+
+/* EXTRACT ONLY ESTIMATED STONE SIZE */
+const getStoneMeasurements = (result) => {
+  const detections = Array.isArray(result?.detections)
+    ? result.detections
+    : [];
+
+  return detections.map((detection, index) => {
+    const dimensions = detection?.dimensions || {};
+
+    let estimatedSize = null;
+
+    const possibleKeys = [
+      "estimated_size_mm",
+      "estimated_size",
+      "estimated size",
+      "estimatedsize",
+      "size_estimation",
+      "size_estimate",
+      "stone_size",
+      "stone_size_mm",
+    ];
+
+    const normalizeKey = (key) =>
+      String(key).toLowerCase().replace(/[\s_-]/g, "");
+
+    const getUnit = (source) =>
+      source?.unit || source?.units || "mm";
+
+    const findEstimatedValue = (source) => {
+      if (!source || typeof source !== "object") return null;
+
+      for (const key of possibleKeys) {
+        const value = source[key];
+
+        if (value !== undefined && value !== null && value !== "") {
+          return formatSize(value, getUnit(source));
+        }
+      }
+
+      // Handles keys such as "estimated size (mm)"
+      for (const [key, value] of Object.entries(source)) {
+        const normalized = normalizeKey(key);
+
+        if (
+          normalized.includes("estimatedsize") &&
+          value !== null &&
+          value !== undefined &&
+          value !== ""
+        ) {
+          return formatSize(value, "mm");
+        }
+      }
+
+      return null;
+    };
+
+    // Dimensions returned as a string
+    if (typeof dimensions === "string") {
+      const match = dimensions.match(
+        /estimated[\s_-]*size(?:\s*\(mm\))?\s*[:=]\s*(\d+(?:\.\d+)?)\s*(mm)?/i
+      );
+
+      if (match) {
+        estimatedSize = formatSize(match[1], match[2] || "mm");
+      }
+    }
+
+    // Dimensions returned as an object
+    if (!estimatedSize && typeof dimensions === "object") {
+      estimatedSize = findEstimatedValue(dimensions);
+
+      // Check nested measurement data
+      if (!estimatedSize) {
+        const nestedSources = [
+          dimensions.measurements,
+          dimensions.measurement,
+          dimensions.size,
+          dimensions.value,
+          detection?.measurements,
+        ];
+
+        for (const nested of nestedSources) {
+          if (typeof nested === "string") {
+            const match = nested.match(
+              /estimated[\s_-]*size\s*[:=]\s*(\d+(?:\.\d+)?)\s*(mm)?/i
+            );
+
+            if (match) {
+              estimatedSize = formatSize(match[1], match[2] || "mm");
+            }
+          } else if (nested && typeof nested === "object") {
+            estimatedSize = findEstimatedValue(nested);
+          }
+
+          if (estimatedSize) break;
+        }
+      }
+    }
+
+    // Check direct detection properties
+    if (!estimatedSize) {
+      estimatedSize = findEstimatedValue(detection);
+    }
+
+    return {
+      stone: `Stone ${index + 1}`,
+      size: estimatedSize || "Not available",
+    };
+  });
 };
 
 /* RESULT IMAGE CARD */
-const ResultImage = ({ title, image, description, number }) => {
+const ResultImage = ({
+  title,
+  image,
+  description,
+  number,
+  measurements = [],
+}) => {
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
@@ -64,72 +207,127 @@ const ResultImage = ({ title, image, description, number }) => {
 
   if (!image) return null;
 
+  const isSizeImage = title === "Stone Size Estimation";
+
   return (
-    <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-slate-400 hover:shadow-lg">
-      {/* CARD HEADER */}
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 sm:px-5">
+    <div
+      className={`group min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:border-slate-300 hover:shadow-lg ${
+        isSizeImage ? "lg:col-span-2" : ""
+      }`}
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
             <FiImage size={19} />
           </div>
 
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-bold text-slate-900 sm:text-base">
+            <h3 className="truncate text-sm font-semibold text-slate-900 sm:text-base">
               {title}
             </h3>
 
-            <p className="mt-1 text-xs text-slate-500">
-              {description}
-            </p>
+            {!isSizeImage && (
+              <p className="mt-1 text-xs text-slate-500">
+                {description}
+              </p>
+            )}
           </div>
         </div>
 
-        <span className="ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-medium text-slate-700">
           {number}
         </span>
       </div>
 
-      {/* IMAGE PREVIEW */}
-      <div className="relative flex min-h-[230px] items-center justify-center bg-slate-100 p-3 sm:min-h-[270px] sm:p-5">
+      {/* IMAGE */}
+      <div className="flex min-h-[300px] items-center justify-center bg-slate-50 p-3 sm:p-5">
         {imageError ? (
           <div className="py-10 text-center text-sm text-slate-500">
             <FiImage className="mx-auto mb-2 text-2xl" />
             Unable to load this image.
           </div>
         ) : (
-          <>
+          <div className="relative w-full">
             <a
               href={image}
               target="_blank"
               rel="noreferrer"
-              className="block w-full cursor-zoom-in"
               title="Open full image"
+              className="block cursor-zoom-in"
             >
               <img
                 src={image}
                 alt={title}
                 onError={() => setImageError(true)}
-                className="mx-auto max-h-[350px] w-full rounded-lg object-contain"
+                className="mx-auto h-[300px] w-full rounded-lg object-contain sm:h-[350px]"
               />
             </a>
 
-            <div className="pointer-events-none absolute bottom-5 right-5 flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white/90 text-slate-700 shadow-sm">
-              <FiMaximize size={15} />
+            <div className="pointer-events-none absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-700 shadow-sm">
+              <FiMaximize size={16} />
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* CARD FOOTER */}
-      <div className="border-t border-slate-200 bg-white px-4 py-3 sm:px-5">
-        <p className="text-xs leading-5 text-slate-500">
-          {description}
-        </p>
-      </div>
+      {/* STONE SIZE TABLE */}
+      {isSizeImage && (
+        <div className="border-t border-slate-200 bg-white p-4 sm:p-5">
+          {measurements.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border border-slate-200">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="px-4 py-3 text-sm font-medium text-slate-600">
+                      Stone
+                    </th>
+
+                    <th className="px-4 py-3 text-right text-sm font-medium text-slate-600">
+                      Estimated Size
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {measurements.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="border-t border-slate-100 transition hover:bg-slate-50"
+                    >
+                      <td className="px-4 py-3 text-sm font-normal text-slate-700">
+                        {item.stone}
+                      </td>
+
+                      <td className="px-4 py-3 text-right text-sm font-normal text-slate-700">
+                        {item.size}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="py-4 text-center text-sm font-normal text-slate-500">
+              Stone measurements are not available.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* DESCRIPTION FOR OTHER IMAGES */}
+      {!isSizeImage && (
+        <div className="border-t border-slate-100 px-5 py-3">
+          <p className="text-xs leading-5 text-slate-500">
+            {description}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
+/* MAIN DETECTION COMPONENT */
 export default function Detection() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
@@ -142,6 +340,7 @@ export default function Detection() {
   const [reportError, setReportError] = useState("");
   const [dragging, setDragging] = useState(false);
 
+  /* CLEANUP PREVIEW URL */
   useEffect(() => {
     return () => {
       if (preview && preview.startsWith("blob:")) {
@@ -158,7 +357,11 @@ export default function Detection() {
     setReportError("");
     setResult(null);
 
-    const validTypes = ["image/png", "image/jpeg", "image/jpg"];
+    const validTypes = [
+      "image/png",
+      "image/jpeg",
+      "image/jpg",
+    ];
 
     if (!validTypes.includes(selectedFile.type)) {
       setError("Please upload a PNG or JPG image.");
@@ -216,7 +419,9 @@ export default function Detection() {
 
       if (!response.ok) {
         throw new Error(
-          data?.message || data?.error || "Image processing failed."
+          data?.message ||
+          data?.error ||
+          "Image processing failed."
         );
       }
 
@@ -224,7 +429,7 @@ export default function Detection() {
     } catch (err) {
       setError(
         err.message ||
-          "Unable to connect to the backend. Please check that the Flask server is running."
+        "Unable to connect to the backend. Please check that the Flask server is running."
       );
     } finally {
       setLoading(false);
@@ -240,17 +445,21 @@ export default function Detection() {
     setReportError("");
   };
 
-  /* RESULT STATUS */
+  /* STATUS */
   const rejected = result?.accepted === false;
 
   const noStone =
     !rejected &&
-    (result?.detected === false ||
+    (
+      result?.detected === false ||
       result?.stone_detected === false ||
       result?.no_stone_detected === true ||
-      result?.status === "no_detection");
+      result?.status === "no_detection"
+    );
 
-  /* RESULT IMAGES */
+  const stoneMeasurements = getStoneMeasurements(result);
+
+  /* OUTPUT IMAGES */
   const outputs = result
     ? [
         {
@@ -272,7 +481,7 @@ export default function Detection() {
             "mask_image",
             "segmented_image",
           ]),
-          description: "Segmented kidney stone mask.",
+          description: "Individual kidney stone segmentation masks.",
         },
         {
           title: "Stone Size Estimation",
@@ -281,12 +490,12 @@ export default function Detection() {
             "size_image",
             "measurement_image",
           ]),
-          description: "Visual representation of estimated stone dimensions.",
+          description: "Stone size estimation output.",
         },
       ].filter((item) => item.image)
     : [];
 
-  /* SIZE ESTIMATE */
+  /* OVERALL SIZE */
   const getSizeEstimate = () => {
     if (!result) return "Not available";
 
@@ -299,7 +508,10 @@ export default function Detection() {
     ];
 
     const value = possibleValues.find(
-      (item) => item !== undefined && item !== null && item !== ""
+      (item) =>
+        item !== undefined &&
+        item !== null &&
+        item !== ""
     );
 
     if (typeof value === "object") {
@@ -333,28 +545,45 @@ export default function Detection() {
       const date = new Date().toLocaleDateString();
       const time = new Date().toLocaleTimeString();
 
-      const originalImage = escapeHTML(preview);
-      const sizeEstimate = escapeHTML(getSizeEstimate());
-
-      const reportStatus = noStone
-        ? "No Stone Detected"
-        : "Kidney CT Image Processed";
+      const measurementsHTML = stoneMeasurements.length
+        ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Stone</th>
+                <th>Estimated Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${stoneMeasurements
+                .map(
+                  (item) => `
+                    <tr>
+                      <td>${escapeHTML(item.stone)}</td>
+                      <td>${escapeHTML(item.size)}</td>
+                    </tr>
+                  `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        `
+        : `<p>Stone measurements are not available.</p>`;
 
       const outputFigures = outputs
         .map(
           (item, index) => `
             <div class="figure">
-              <div class="figure-heading">
-                <span class="figure-number">${index + 1}</span>
-                <h3>${escapeHTML(item.title)}</h3>
-              </div>
-
+              <h3>${index + 1}. ${escapeHTML(item.title)}</h3>
               <img
                 src="${escapeHTML(item.image)}"
                 alt="${escapeHTML(item.title)}"
               />
-
-              <p>${escapeHTML(item.description)}</p>
+              ${
+                item.title === "Stone Size Estimation"
+                  ? measurementsHTML
+                  : `<p>${escapeHTML(item.description)}</p>`
+              }
             </div>
           `
         )
@@ -365,7 +594,6 @@ export default function Detection() {
         <html>
         <head>
           <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <title>Kidney Stone Detection Report</title>
 
           <style>
@@ -375,78 +603,43 @@ export default function Detection() {
 
             body {
               margin: 0;
-              padding: 30px;
+              padding: 25px;
               background: #f8fafc;
               color: #1e293b;
-              font-family: Arial, Helvetica, sans-serif;
+              font-family: Arial, sans-serif;
             }
 
             .report {
               max-width: 850px;
               margin: auto;
-              padding: 42px;
-              background: #ffffff;
+              padding: 35px;
+              background: white;
               border: 1px solid #e2e8f0;
-              box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
             }
 
-            .header {
-              padding-bottom: 24px;
+            header {
+              padding-bottom: 20px;
               border-bottom: 3px solid #0f172a;
             }
 
-            .brand {
-              margin-bottom: 12px;
-              color: #475569;
-              font-size: 10px;
-              font-weight: bold;
-              letter-spacing: 2px;
-              text-transform: uppercase;
-            }
-
-            .header h1 {
-              margin: 0;
+            header h1 {
+              margin: 8px 0;
               color: #0f172a;
-              font-size: 27px;
-              line-height: 1.3;
             }
 
-            .header p {
-              margin: 8px 0 0;
+            header p {
               color: #64748b;
               font-size: 13px;
-              line-height: 1.6;
             }
 
-            .section {
-              margin-top: 30px;
+            section {
+              margin-top: 28px;
             }
 
-            .section h2 {
-              margin: 0 0 15px;
-              padding-bottom: 10px;
+            h2 {
+              padding-bottom: 9px;
               border-bottom: 1px solid #e2e8f0;
-              color: #0f172a;
-              font-size: 17px;
-            }
-
-            .summary {
-              padding: 17px 18px;
-              border: 1px solid #cbd5e1;
-              border-left: 4px solid #0f172a;
-              border-radius: 7px;
-              background: #f1f5f9;
-              color: #0f172a;
-              font-size: 14px;
-              font-weight: bold;
-            }
-
-            .summary p {
-              margin: 7px 0 0;
-              color: #64748b;
-              font-size: 12px;
-              font-weight: normal;
-              line-height: 1.6;
+              font-size: 18px;
             }
 
             .details {
@@ -456,10 +649,9 @@ export default function Detection() {
             }
 
             .detail {
-              padding: 14px;
+              padding: 13px;
               border: 1px solid #e2e8f0;
-              border-radius: 7px;
-              background: #ffffff;
+              border-radius: 6px;
             }
 
             .detail span {
@@ -470,97 +662,67 @@ export default function Detection() {
             }
 
             .detail strong {
-              color: #0f172a;
               font-size: 13px;
-              overflow-wrap: anywhere;
             }
 
-            .original-image {
+            img {
               display: block;
               width: 100%;
-              max-height: 430px;
-              margin: 14px auto;
+              max-height: 400px;
+              margin: 15px auto;
               object-fit: contain;
               border: 1px solid #e2e8f0;
-              border-radius: 8px;
               background: #f8fafc;
             }
 
             .figure {
-              margin: 20px 0 26px;
+              margin: 20px 0;
               padding: 15px;
               border: 1px solid #e2e8f0;
-              border-radius: 8px;
+              border-radius: 7px;
               page-break-inside: avoid;
             }
 
-            .figure-heading {
-              display: flex;
-              align-items: center;
-              gap: 10px;
-              margin-bottom: 12px;
-            }
-
-            .figure-number {
-              display: inline-flex;
-              width: 27px;
-              height: 27px;
-              align-items: center;
-              justify-content: center;
-              border-radius: 6px;
-              background: #0f172a;
-              color: #ffffff;
-              font-size: 12px;
-              font-weight: bold;
-            }
-
             .figure h3 {
-              margin: 0;
-              color: #0f172a;
-              font-size: 14px;
+              font-size: 15px;
             }
 
-            .figure img {
-              display: block;
+            table {
               width: 100%;
-              max-height: 420px;
-              margin: 0 auto;
-              object-fit: contain;
-              border: 1px solid #e2e8f0;
-              border-radius: 6px;
-              background: #f8fafc;
+              border-collapse: collapse;
+              margin-top: 12px;
             }
 
-            .figure p {
-              margin: 10px 0 0;
-              color: #64748b;
+            th,
+            td {
+              padding: 11px;
+              border: 1px solid #e2e8f0;
+              text-align: left;
               font-size: 12px;
-              line-height: 1.6;
+              font-weight: normal;
+            }
+
+            th {
+              background: #f1f5f9;
+              color: #475569;
             }
 
             .note {
-              padding: 16px;
-              border: 1px solid #e2e8f0;
-              border-left: 4px solid #334155;
-              border-radius: 6px;
+              padding: 15px;
               background: #f8fafc;
-              color: #475569;
+              border: 1px solid #e2e8f0;
               font-size: 12px;
               line-height: 1.8;
             }
 
-            .note strong {
-              color: #0f172a;
-            }
-
-            .footer {
-              margin-top: 38px;
-              padding-top: 17px;
+            footer {
+              margin-top: 35px;
+              padding-top: 15px;
               border-top: 1px solid #e2e8f0;
               color: #64748b;
               font-size: 11px;
-              line-height: 1.8;
               text-align: center;
+              line-height: 1.8;
             }
 
             @media print {
@@ -571,24 +733,16 @@ export default function Detection() {
 
               body {
                 padding: 0;
-                background: #ffffff;
+                background: white;
               }
 
               .report {
-                max-width: none;
-                padding: 10px;
                 border: none;
-                box-shadow: none;
+                padding: 5px;
               }
 
-              .section,
-              .figure {
-                page-break-inside: avoid;
-              }
-
-              .figure img,
-              .original-image {
-                max-height: 350px;
+              img {
+                max-height: 340px;
               }
             }
           </style>
@@ -596,36 +750,31 @@ export default function Detection() {
 
         <body>
           <main class="report">
-
-            <header class="header">
-              <div class="brand">
-                Kidney Stone Detection & Analysis System
-              </div>
-
+            <header>
+              <strong>KIDNEY STONE DETECTION & ANALYSIS SYSTEM</strong>
               <h1>Kidney Stone Detection Report</h1>
-
-              <p>
-                AI-Based Kidney CT Image Analysis System
-              </p>
+              <p>AI-Based Kidney CT Image Analysis System</p>
             </header>
 
-            <section class="section">
+            <section>
               <h2>Analysis Summary</h2>
 
-              <div class="summary">
-                ${escapeHTML(reportStatus)}
+              <p>
+                <strong>
+                  ${noStone ? "No Stone Detected" : "Image Processed"}
+                </strong>
+              </p>
 
-                <p>
-                  ${
-                    noStone
-                      ? "The uploaded image passed the image filtering stage, but the detection model did not report a kidney stone."
-                      : "The uploaded image passed the image filtering stage and was processed by the available analysis pipeline."
-                  }
-                </p>
-              </div>
+              <p>
+                ${
+                  noStone
+                    ? "The image passed the filtering stage, but no kidney stone was reported."
+                    : "The uploaded image was processed by the available analysis pipeline."
+                }
+              </p>
             </section>
 
-            <section class="section">
+            <section>
               <h2>Report Information</h2>
 
               <div class="details">
@@ -646,74 +795,57 @@ export default function Detection() {
 
                 <div class="detail">
                   <span>Estimated Stone Size</span>
-                  <strong>${sizeEstimate}</strong>
+                  <strong>${escapeHTML(getSizeEstimate())}</strong>
                 </div>
               </div>
             </section>
 
-            <section class="section">
+            <section>
               <h2>Original CT Scan Image</h2>
-
-              <img
-                class="original-image"
-                src="${originalImage}"
-                alt="Original CT scan"
-              />
+              <img src="${escapeHTML(preview)}" alt="Original CT scan" />
             </section>
 
-            <section class="section">
+            <section>
               <h2>Model Processing Results</h2>
-
-              ${
-                outputFigures ||
-                `<p style="color:#64748b;font-size:13px;">
-                  No output images were provided by the backend.
-                </p>`
-              }
+              ${outputFigures || "<p>No output images were returned.</p>"}
             </section>
 
-            <section class="section">
+            <section>
               <h2>Processing Methodology</h2>
 
               <div class="note">
                 <strong>Image Filtering:</strong>
-                The image filtering stage checks whether the uploaded image
-                belongs to the supported kidney CT image category.
-
+                Checks whether the uploaded image belongs to the supported kidney CT image category.
                 <br /><br />
 
                 <strong>Detection:</strong>
-                YOLOv11 is used for kidney stone detection and localization.
-
+                YOLOv11 detects and localizes kidney stones.
                 <br /><br />
 
                 <strong>Segmentation:</strong>
-                SAM is used to generate a segmentation mask for the detected region.
-
+                SAM generates segmentation masks for detected stones.
                 <br /><br />
 
                 <strong>Size Estimation:</strong>
-                OpenCV is used for image-based stone size estimation.
-                The report displays the estimate returned by the backend, when available.
+                OpenCV estimates stone dimensions from image measurements.
               </div>
             </section>
 
-            <section class="section">
+            <section>
               <h2>Important Disclaimer</h2>
 
               <div class="note">
                 This report is generated by an academic research prototype.
                 It is intended for educational and research purposes only.
-                It is not a clinical diagnosis and must not be used as a
-                substitute for professional medical evaluation.
+                It is not a clinical diagnosis and must not replace professional
+                medical evaluation.
               </div>
             </section>
 
-            <footer class="footer">
+            <footer>
               Kidney Stone Detection & Analysis System<br />
               Final Year Project | Artificial Intelligence & Deep Learning
             </footer>
-
           </main>
 
           <script>
@@ -742,7 +874,9 @@ export default function Detection() {
       reportWindow.document.write(html);
       reportWindow.document.close();
     } catch (err) {
-      setReportError(err.message || "Unable to generate the PDF report.");
+      setReportError(
+        err.message || "Unable to generate the PDF report."
+      );
     } finally {
       setReportLoading(false);
     }
@@ -810,7 +944,6 @@ export default function Detection() {
               </div>
 
               <div className="p-5">
-
                 {!preview ? (
                   <label
                     onDragOver={(event) => {
@@ -819,7 +952,7 @@ export default function Detection() {
                     }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={handleDrop}
-                    className={`flex min-h-[280px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-8 text-center transition duration-300 ${
+                    className={`flex min-h-[280px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-8 text-center transition ${
                       dragging
                         ? "border-slate-900 bg-slate-100"
                         : "border-slate-300 bg-slate-50 hover:border-slate-500 hover:bg-slate-100"
@@ -889,7 +1022,6 @@ export default function Detection() {
                   </div>
                 )}
 
-                {/* ERROR */}
                 {error && (
                   <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                     <FiAlertCircle className="mt-0.5 shrink-0" />
@@ -897,7 +1029,6 @@ export default function Detection() {
                   </div>
                 )}
 
-                {/* DETECTION BUTTON */}
                 <button
                   type="button"
                   onClick={handleDetection}
@@ -928,7 +1059,6 @@ export default function Detection() {
                   </button>
                 )}
 
-                {/* IMAGE FILTERING INFO */}
                 <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white">
@@ -941,13 +1071,12 @@ export default function Detection() {
                       </h4>
 
                       <p className="mt-1 text-xs leading-5 text-slate-600">
-                        The uploaded image is checked before the detection
-                        and segmentation stages are performed.
+                        The uploaded image is checked before the detection and
+                        segmentation stages are performed.
                       </p>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -956,7 +1085,6 @@ export default function Detection() {
           <div className="lg:col-span-7">
             <div className="min-h-[420px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-900/5">
 
-              {/* RESULTS HEADER */}
               <div className="flex items-center justify-between border-b border-slate-200 px-5 py-5 sm:px-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
@@ -982,8 +1110,6 @@ export default function Detection() {
               </div>
 
               <div className="p-5 sm:p-6">
-
-                {/* EMPTY STATE */}
                 {!result && !loading && (
                   <div className="flex min-h-[330px] flex-col items-center justify-center text-center">
                     <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">
@@ -1001,7 +1127,6 @@ export default function Detection() {
                   </div>
                 )}
 
-                {/* LOADING STATE */}
                 {loading && (
                   <div className="flex min-h-[330px] flex-col items-center justify-center text-center">
                     <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-100 text-slate-800">
@@ -1019,7 +1144,6 @@ export default function Detection() {
                   </div>
                 )}
 
-                {/* RESULT CONTENT */}
                 {result && !loading && (
                   <div className="space-y-6">
 
@@ -1089,7 +1213,7 @@ export default function Detection() {
                           </div>
                         )}
 
-                        {/* OUTPUT SECTION */}
+                        {/* OUTPUT CARDS */}
                         {outputs.length > 0 && (
                           <div>
                             <div className="mb-5 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
@@ -1109,23 +1233,20 @@ export default function Detection() {
                               </span>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                               {outputs.map((item, index) => (
-                                <div
+                                <ResultImage
                                   key={item.title}
-                                  className={
-                                    outputs.length === 3 && index === 2
-                                      ? "md:col-span-2"
-                                      : ""
+                                  number={String(index + 1).padStart(2, "0")}
+                                  title={item.title}
+                                  image={item.image}
+                                  description={item.description}
+                                  measurements={
+                                    item.title === "Stone Size Estimation"
+                                      ? stoneMeasurements
+                                      : []
                                   }
-                                >
-                                  <ResultImage
-                                    number={String(index + 1).padStart(2, "0")}
-                                    title={item.title}
-                                    image={item.image}
-                                    description={item.description}
-                                  />
-                                </div>
+                                />
                               ))}
                             </div>
                           </div>
@@ -1164,7 +1285,7 @@ export default function Detection() {
                                 Processing Status
                               </p>
 
-                              <p className="mt-2 text-sm font-bold text-slate-900">
+                              <p className="mt-2 text-sm font-semibold text-slate-900">
                                 {noStone
                                   ? "No Stone Detected"
                                   : "Image Processed"}
@@ -1173,15 +1294,16 @@ export default function Detection() {
 
                             <div className="rounded-xl border border-slate-200 bg-white p-4">
                               <p className="text-xs font-medium text-slate-500">
-                                Estimated Stone Size
+                                Detected Stones
                               </p>
 
-                              <p className="mt-2 break-words text-sm font-bold text-slate-900">
-                                {noStone ? "Not available" : getSizeEstimate()}
+                              <p className="mt-2 text-sm font-semibold text-slate-900">
+                                {stoneMeasurements.length}
                               </p>
                             </div>
                           </div>
 
+                          {/* EXPORT REPORT */}
                           <div className="border-t border-slate-200 p-4 sm:p-5">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                               <div>

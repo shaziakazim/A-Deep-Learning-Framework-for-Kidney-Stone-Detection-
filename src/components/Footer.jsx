@@ -105,7 +105,7 @@ function Footer() {
 
               <li className="flex items-center gap-3">
                 <FiMail className="shrink-0 text-cyan-400" size={17} />
-                <span>support@kidneydetector.com</span>
+                <span>nianokamitaf@gmail.com</span>
               </li>
 
               <li className="flex items-center gap-3">
@@ -115,7 +115,7 @@ function Footer() {
 
               <li className="flex items-center gap-3">
                 <FiPhone className="shrink-0 text-cyan-400" size={17} />
-                <span>+92 300 1234567</span>
+                <span>+92 3554595490</span>
               </li>
 
             </ul>
